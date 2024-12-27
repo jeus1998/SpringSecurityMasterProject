@@ -3,7 +3,6 @@ package com.example.springsecuritymaster.users.controller;
 import com.example.springsecuritymaster.domain.dto.AccountDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +22,10 @@ public class LoginController {
         model.addAttribute("error", error);
         model.addAttribute("exception", exception);
         return "/login/login";
+    }
+    @GetMapping(value="/api/login")
+    public String apiLogin(){
+        return "/rest/login";
     }
     @GetMapping("/signup")
     public String signup(){
