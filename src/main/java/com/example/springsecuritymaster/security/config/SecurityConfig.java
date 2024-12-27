@@ -1,5 +1,6 @@
 package com.example.springsecuritymaster.security.config;
 
+import com.example.springsecuritymaster.security.handler.FormAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/css/**", "/images/**",
                                 "/js/**", "/favicon.*", "/*/icon/-*").permitAll()
-                        .requestMatchers("/", "/signup").permitAll()
+                        .requestMatchers("/", "/signup", "/login*").permitAll()
+                        .requestMatchers("/user").hasRole("USER")
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/manager").hasRole("MANAGER")
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
                 .formLogin(form -> form
@@ -33,7 +37,9 @@ public class SecurityConfig {
                         .authenticationDetailsSource(authenticationDetailsSource)
                         .successHandler(successHandler)
                         .failureHandler(failureHandler)
-                        .permitAll());
+                        .permitAll())
+                .exceptionHandling(ex -> ex.accessDeniedHandler(
+                        new FormAccessDeniedHandler("/denied")));
         return http.build();
     }
 }
