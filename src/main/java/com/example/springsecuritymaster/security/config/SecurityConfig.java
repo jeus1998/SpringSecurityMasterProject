@@ -1,5 +1,7 @@
-package com.example.springsecuritymaster.config;
+package com.example.springsecuritymaster.security.config;
 
+import com.example.springsecuritymaster.security.service.FormUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,7 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final FormUserDetailsService userDetailsService;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
@@ -23,14 +27,11 @@ public class SecurityConfig {
                                 "/js/**", "/favicon.*", "/*/icon/-*").permitAll()
                         .requestMatchers("/", "/signup").permitAll()
                         .anyRequest().authenticated())
+
+                .userDetailsService(userDetailsService)
                 .formLogin(form -> form.loginPage("/login").permitAll());
 
         return http.build();
-    }
-    @Bean
-    public UserDetailsService userDetailsService(){
-        UserDetails user = User.withUsername("user").password("{noop}1111").roles("USER").build();
-        return new InMemoryUserDetailsManager(user);
     }
     @Bean
     public PasswordEncoder passwordEncoder(){
