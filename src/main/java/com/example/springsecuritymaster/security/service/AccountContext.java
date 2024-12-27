@@ -1,6 +1,7 @@
 package com.example.springsecuritymaster.security.service;
 
 import com.example.springsecuritymaster.domain.dto.AccountDto;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Getter
 public class AccountContext implements UserDetails {
     private final AccountDto accountDto;
     private final List<GrantedAuthority> authorities;
