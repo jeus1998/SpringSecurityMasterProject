@@ -1,5 +1,6 @@
 package com.example.springsecuritymaster.security.config;
 
+import com.example.springsecuritymaster.security.entrypoint.RestAuthenticationEntryPoint;
 import com.example.springsecuritymaster.security.filters.RestAuthenticationFilter;
 import com.example.springsecuritymaster.security.handler.*;
 import lombok.RequiredArgsConstructor;
@@ -42,12 +43,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**",
                                 "/js/**", "/favicon.*", "/*/icon/-*").permitAll()
+                        .requestMatchers("/api", "/api/login").permitAll()
+                        .requestMatchers("/api/user").hasAuthority("ROLE_USER")
+                        .requestMatchers("/api/manager").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/api/admin").hasAuthority("ROLE_ADMIN")
                         .anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(
                         restAuthenticationFilter(http, authenticationManager),
                         UsernamePasswordAuthenticationFilter.class)
-                .authenticationManager(authenticationManager);
+                .authenticationManager(authenticationManager)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                        .accessDeniedHandler(new RestAccessDeniedHandler()));
 
         return http.build();
     }
