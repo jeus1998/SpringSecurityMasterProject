@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class RestApiController {
+    private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
     @GetMapping("/user")
     public AccountDto restUser(@AuthenticationPrincipal AccountDto accountDto){
         return accountDto;
@@ -25,5 +26,11 @@ public class RestApiController {
     @GetMapping("/admin")
     public AccountDto restAdmin(@AuthenticationPrincipal AccountDto accountDto){
         return accountDto;
+    }
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response){
+        Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
+        logoutHandler.logout(request, response, authentication);
+        return "logout";
     }
 }
