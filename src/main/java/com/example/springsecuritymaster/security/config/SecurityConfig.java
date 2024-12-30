@@ -3,10 +3,15 @@ package com.example.springsecuritymaster.security.config;
 import com.example.springsecuritymaster.security.entrypoint.RestAuthenticationEntryPoint;
 import com.example.springsecuritymaster.security.filters.RestAuthenticationFilter;
 import com.example.springsecuritymaster.security.handler.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -14,8 +19,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
+import java.awt.*;
+import java.io.IOException;
 
 @EnableWebSecurity
 @Configuration
@@ -43,7 +56,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**",
                                 "/js/**", "/favicon.*", "/*/icon/-*").permitAll()
-                        .requestMatchers("/api", "/api/login").permitAll()
+                        .requestMatchers("/api", "/api/login", "/api/logout").permitAll()
                         .requestMatchers("/api/user").hasAuthority("ROLE_USER")
                         .requestMatchers("/api/manager").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/api/admin").hasAuthority("ROLE_ADMIN")
@@ -55,7 +68,16 @@ public class SecurityConfig {
                 .authenticationManager(authenticationManager)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(new RestAuthenticationEntryPoint())
-                        .accessDeniedHandler(new RestAccessDeniedHandler()));
+                        .accessDeniedHandler(new RestAccessDeniedHandler()))
+                .logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .addLogoutHandler(new SecurityContextLogoutHandler())
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpStatus.OK.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("logout success");
+                        })
+                        .permitAll());
 
         return http.build();
     }
